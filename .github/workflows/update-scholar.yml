@@ -1,0 +1,66 @@
+# Monthly refresh of Google Scholar numbers + chart.
+# Writes data/scholar.json and figures/scholar_{light,dark}.png, then commits them.
+# Google Scholar often blocks cloud runners: that case (exit 2) is a warning, not a failure.
+name: Update Scholar data
+
+on:
+  schedule:
+    - cron: "17 9 1 * *"   # 09:17 UTC on the 1st of every month
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+# Never run two updates at once (they would race on the commit/push).
+concurrency:
+  group: update-scholar
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # Capture the exit code instead of failing immediately:
+      #   0 = success, 2 = Google Scholar unavailable (nothing written), other = real error.
+      - name: Generate Scholar data and charts
+        id: scholar
+        env:
+          GITHUB_TOKEN: ${{ github.token }}  # publications are counted via the GitHub API
+        run: |
+          set +e
+          python scholar_plot.py
+          code=$?
+          set -e
+          echo "exit_code=$code" >> "$GITHUB_OUTPUT"
+          if [ "$code" -eq 0 ]; then
+            echo "Scholar data generated."
+          elif [ "$code" -eq 2 ]; then
+            echo "::warning title=Google Scholar blocked::Google Scholar blocked this GitHub runner, so nothing was updated. The last good data/scholar.json and figures are kept. Run 'python scholar_plot.py' locally and commit to refresh."
+          else
+            echo "::error::scholar_plot.py failed with exit code $code"
+            exit "$code"
+          fi
+
+      # Only commit after a successful run, and only if outputs actually changed.
+      - name: Commit and push changes
+        if: steps.scholar.outputs.exit_code == '0'
+        run: |
+          if [ -n "$(git status --porcelain data/ figures/)" ]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+            git add data/ figures/
+            git commit -m "Update Scholar data ($(date -u +%F))"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          else
+            echo "No changes"
+          fi
