@@ -1,0 +1,5 @@
+scholarly
+matplotlib
+requests
+# scholarly 1.7.x imports bibtexparser.bibdatabase, removed in bibtexparser 2.0
+bibtexparser<2
