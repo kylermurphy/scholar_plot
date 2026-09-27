@@ -1,7 +1,8 @@
 # scholar_plot
 
-Builds the research-impact numbers and chart used on
-[kylermurphy.github.io](https://kylermurphy.github.io):
+Builds the research-impact numbers used on
+[kylermurphy.github.io](https://kylermurphy.github.io) (landing page and CV), plus a
+citations/publications chart:
 
 1. fetches citation metrics (citations, h-index, i10-index, citations per year) from
    Google Scholar with [scholarly][2];
@@ -10,7 +11,8 @@ Builds the research-impact numbers and chart used on
 3. writes `data/scholar.json` and renders `figures/scholar_light.png` / `figures/scholar_dark.png`.
 
 A monthly GitHub Action runs `scholar_plot.py` and commits the outputs to `master`.
-The site only *reads* these files; nothing is ever written to the site repo.
+The site only *reads* `data/scholar.json`; nothing is ever written to the site repo.
+The chart PNGs aren't currently shown on the site; they're kept for use elsewhere (talks, CV PDFs).
 
 ## Outputs
 

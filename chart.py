@@ -1,4 +1,4 @@
-"""Render the citations + publications chart for the website sidebar.
+"""Render the citations + publications chart (sized for a ~200 px sidebar).
 
 One axes with two y-scales: citations per year as bars (left axis) and
 publications per year as a line with dots (right axis). The current,
@@ -9,7 +9,7 @@ Two transparent PNGs are written, one per site theme:
     figures/scholar_light.png
     figures/scholar_dark.png
 
-They are sized to display at ~200 px wide in the sidebar and saved at 3x
+They are sized to display at ~200 px wide and saved at 3x
 resolution so they stay sharp on high-density screens.
 """
 
